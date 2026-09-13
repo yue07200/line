@@ -1,3 +1,4 @@
+from flask import Flask, abort, jsonify, render_template, request
 from datetime import date, datetime
 import json
 import os
@@ -138,6 +139,9 @@ def save_progress(data):
   with open(DATA_FILE, 'w', encoding='utf-8') as f:
     json.dump(data, f, ensure_ascii=False)
 
+@app.route('/')
+def index():
+  return render_template('index.html')
 
 @app.route('/api/progress', methods=['GET', 'POST'])
 def api_progress():

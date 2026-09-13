@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>研究所甄試準備進度管家</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>body { font-family: 'Inter', sans-serif; }</style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen p-4 sm:p-8">
+    <div class="max-w-5xl mx-auto">
+        <header class="bg-white shadow-sm rounded-2xl p-6 mb-6 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div>
+                <h1 class="text-2xl font-bold text-slate-900">🎓 研究所甄試準備進度管家</h1>
+                <p class="text-sm text-slate-500 mt-1">勾選完成的備審資料，進度會自動同步至雲端 LINE 機器人。</p>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="school-cards-container"></div>
+    </div>
+
+    <script>
+        const BACKEND_URL = "https://line-jr9f.onrender.com"; // 記得改成你的 Render 網址
+
+        const schoolsData = [
+            {
+                "學校": "國立高雄科技大學",
+                "校系": "資訊管理系碩士班",
+                "報名時間": "115.09.15 10:00 至 10.06 17:00",
+                "資料上傳截止日": "115.10.06 17:00",
+                "推薦函要求": "無特別規定",
+                "面試時間": "115.11.07",
+                "報名費": "未註明",
+                "放榜時間": "115.11.19 10:00",
+                "備審資料清單": "[ ] 在學證明/學生證\n[ ] 歷年成績單\n[ ] 學業成績名次證明\n[ ] 碩士學習/生涯規劃書\n[ ] 證明自己能力或成就之各項資料影本"
+            },
+            {
+                "學校": "國立臺灣科技大學",
+                "校系": "資訊管理系碩士班 (甲、乙組)",
+                "報名時間": "115.09.30 09:00 至 10.06 17:00",
+                "資料上傳截止日": "115.10.07 17:00",
+                "推薦函要求": "選繳",
+                "面試時間": "115.11.13 至 11.15",
+                "報名費": "1,300元",
+                "放榜時間": "115.12.02 11:00",
+                "備審資料清單": "[ ] 照片\n[ ] 相關學歷證件(p.3)\n[ ] 大學歷年成績單\n[ ] 個人簡歷(請於上傳畫面下載表件填寫)\n[ ] 進修計畫書\n[ ] 推薦信(選繳)\n[ ] 其他有助於審查之相關文件(如專題報告,獲獎事蹟,英文檢定...)"
+            },
+            {
+                "學校": "國立中興大學",
+                "校系": "資訊管理學系",
+                "報名時間": "115.10.01 09:00 至 10.12 17:00",
+                "資料上傳截止日": "115.10.12 17:00",
+                "推薦函要求": "2封 (無則免附)",
+                "面試時間": "115.11.13",
+                "報名費": "未註明",
+                "放榜時間": "115.11.06 / 11.20",
+                "備審資料清單": "[ ] 學歷證明文件\n[ ] 歷年成績單及名次證明\n[ ] 著作、作品或已發表論文\n[ ] 研究成果(專題報告,參與研究計畫)\n[ ] 自傳(含就讀動機及申請動機)\n[ ] 推薦函 2 封(無則免)\n[ ] 其他有助審查資料文件"
+            },
+            {
+                "學校": "國立雲林科技大學",
+                "校系": "資訊管理系碩士班",
+                "報名時間": "115.09.29 09:00 至 10.15 23:59",
+                "資料上傳截止日": "115.10.16 17:00",
+                "推薦函要求": "必繳 2 封",
+                "面試時間": "115.11.14",
+                "報名費": "1,200元",
+                "放榜時間": "115.11.30",
+                "備審資料清單": "[ ] 國民身分證正反面\n[ ] 在學證明\n[ ] 歷年成績單\n[ ] 名次證明書\n[ ] 推薦信 2 封\n[ ] 學習研究計畫書\n[ ] 自傳\n[ ] 研究(專題)報告\n[ ] 其他證明文件(英文能力證明,專長證明,特殊能力,發表之學術性論文,獲獎)"
+            },
+            {
+                "學校": "國立雲林科技大學",
+                "校系": "國際人工智慧管理研究所碩士班",
+                "報名時間": "115.09.29 09:00 至 10.15 23:59",
+                "資料上傳截止日": "115.10.16 17:00",
+                "推薦函要求": "無特別規定",
+                "面試時間": "115.11.14",
+                "報名費": "1,200元",
+                "放榜時間": "115.11.30",
+                "備審資料清單": "[ ] 國民身分證正反面\n[ ] 在學證明\n[ ] 歷年成績單\n[ ] 英文能力證明\n[ ] 名次證明書\n[ ] 簡歷及自傳\n[ ] 學習計畫書\n[ ] 其他證明(實務專題等)"
+            },
+            {
+                "學校": "彰化師範大學",
+                "校系": "資訊管理系碩士班",
+                "報名時間": "115.09.22 09:00 至 10.06 23:59",
+                "資料上傳截止日": "115.10.07 17:00",
+                "推薦函要求": "無特別規定",
+                "面試時間": "115.11.14",
+                "報名費": "未註明",
+                "放榜時間": "115.11.20",
+                "備審資料清單": "[ ] 國民身分證正反面\n[ ] 在學證明\n[ ] 可資證明個人專業能力之書面資料"
+            },
+            {
+                "學校": "高雄大學",
+                "校系": "資訊管理系碩士班",
+                "報名時間": "115.09.29 至 10.19",
+                "資料上傳截止日": "115.10.19",
+                "推薦函要求": "必繳 2 封",
+                "面試時間": "115.10.31",
+                "報名費": "未註明",
+                "放榜時間": "115.11.11",
+                "備審資料清單": "[ ] 歷年成績單\n[ ] 學業成績總名次證明\n[ ] 推薦函 2 封\n[ ] 履歷,自傳,學習研究計畫書,研究計畫\n[ ] 其他有助審查資料"
+            }
+        ];
+
+        let currentProgress = {};
+
+        async function fetchProgress() {
+            try {
+                const res = await fetch(`${BACKEND_URL}/api/progress`);
+                currentProgress = await res.json();
+            } catch (e) {
+                const saved = localStorage.getItem('grad_app_progress');
+                currentProgress = saved ? JSON.parse(saved) : {};
+            }
+            renderApp();
+        }
+
+        function saveProgress() {
+            localStorage.setItem('grad_app_progress', JSON.stringify(currentProgress));
+            fetch(`${BACKEND_URL}/api/progress`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(currentProgress)
+            }).catch(err => console.error("雲端同步失敗:", err));
+        }
+
+        function renderApp() {
+            const container = document.getElementById('school-cards-container');
+            container.innerHTML = '';
+
+            schoolsData.forEach((school, schoolIndex) => {
+                const items = school['備審資料清單'].split('\n').map(item => item.replace(/\[\s*\]\s*/, '').trim()).filter(i => i);
+                let completedCount = 0;
+                let checklistHtml = '';
+                
+                items.forEach((item, itemIndex) => {
+                    const key = `${schoolIndex}_${itemIndex}`;
+                    const isChecked = currentProgress[key] ? 'checked' : '';
+                    if (isChecked) completedCount++;
+                    
+                    checklistHtml += `
+                        <label class="flex items-center gap-3 p-2 rounded-xl hover:bg-slate-50 cursor-pointer transition select-none">
+                            <input type="checkbox" data-key="${key}" ${isChecked} onchange="updateCheckbox(this)" class="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500">
+                            <span class="text-sm ${isChecked ? 'line-through text-slate-400' : 'text-slate-700'}">${item}</span>
+                        </label>
+                    `;
+                });
+
+                const percent = Math.round((completedCount / items.length) * 100);
+
+                const card = document.createElement('div');
+                card.className = 'bg-white rounded-2xl shadow-sm border border-slate-200 p-6 flex flex-col justify-between';
+                card.innerHTML = `
+                    <div>
+                        <div class="flex justify-between items-start gap-2 mb-3">
+                            <div>
+                                <span class="text-xs font-semibold px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-full">${school['學校']}</span>
+                                <h2 class="text-lg font-bold text-slate-900 mt-1.5">${school['校系']}</h2>
+                            </div>
+                            <span class="text-xs font-bold px-2.5 py-1 bg-slate-100 text-slate-600 rounded-full">${completedCount}/${items.length} (${percent}%)</span>
+                        </div>
+                        <div class="space-y-1.5 text-xs text-slate-600 mb-4 bg-slate-50 p-3.5 rounded-xl border border-slate-100">
+                            <p><strong>📅 報名時間：</strong>${school['報名時間']}</p>
+                            <p><strong>⏰ 截止日期：</strong><span class="text-rose-600 font-bold">${school['資料上傳截止日']}</span></p>
+                            <p><strong>✉️ 推薦函要求：</strong><span class="text-indigo-600 font-bold">${school['推薦函要求']}</span></p>
+                        </div>
+                        <div class="border-t border-slate-100 pt-3">
+                            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">備審資料清單</h4>
+                            <div class="space-y-0.5">${checklistHtml}</div>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function updateCheckbox(checkbox) {
+            const key = checkbox.getAttribute('data-key');
+            currentProgress[key] = checkbox.checked;
+            saveProgress();
+            renderApp();
+        }
+
+        fetchProgress();
+    </script>
+</body>
+</html>
